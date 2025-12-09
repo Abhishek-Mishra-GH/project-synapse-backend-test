@@ -1,20 +1,19 @@
-# cloudbuild.yaml
 steps:
-  # Build the Docker image
+  # Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA'
+      - 'asia-south2-docker.pkg.dev/$PROJECT_ID/test-synapse-repo/$REPO_NAME:$SHORT_SHA'
       - '.'
 
-  # Push the image to Container Registry
+  # Push image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA'
+      - 'asia-south2-docker.pkg.dev/$PROJECT_ID/test-synapse-repo/$REPO_NAME:$SHORT_SHA'
 
-  # Deploy the pushed image to Cloud Run
+  # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
     args:
@@ -22,7 +21,7 @@ steps:
       - 'deploy'
       - '${_SERVICE_NAME}'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA'
+      - 'asia-south2-docker.pkg.dev/$PROJECT_ID/test-synapse-repo/$REPO_NAME:$SHORT_SHA'
       - '--region'
       - '${_REGION}'
       - '--platform'
@@ -32,22 +31,17 @@ steps:
       - '${_PORT}'
       - '--service-account'
       - '${_SERVICE_ACCOUNT}'
-      # set traffic to new revision
       - '--quiet'
 
-# Register the image so Cloud Build knows what was created
 images:
-  - 'gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA'
+  - 'asia-south2-docker.pkg.dev/$PROJECT_ID/test-synapse-repo/$REPO_NAME:$SHORT_SHA'
 
 options:
-  # Required when using a custom build.service_account
   logging: CLOUD_LOGGING_ONLY
-  # Alternative:
-  # defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
 
 substitutions:
-  _REPO_NAME: 'test-synapse'                             # container image name
-  _SERVICE_NAME: 'test-synapse'                          # Cloud Run service name
-  _REGION: 'asia-south2'                                 # Cloud Run region
-  _PORT: '8000'                                          # container port (matches your revision)
+  _REPO_NAME: 'test-synapse'
+  _SERVICE_NAME: 'test-synapse'
+  _REGION: 'asia-south2'
+  _PORT: '8000'
   _SERVICE_ACCOUNT: '341673381134-compute@developer.gserviceaccount.com'
