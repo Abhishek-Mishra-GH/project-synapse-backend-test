@@ -5,8 +5,6 @@ from model_loader import get_model
 
 app = FastAPI()
 
-# domains
-
 Domain = Literal["finance", "healthcare", "ecommerce", "insurance"]
 
 class GenerateRequest(BaseModel):
